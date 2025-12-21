@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useState } from 'react'
 
 const tempMovieData = [
@@ -54,7 +53,9 @@ function Logo() {
     )
 }
 
-function Search({ query, setQuery }) {
+function Search() {
+    const [query, setQuery] = useState('')
+
     return (
         <input
             className="search"
@@ -182,74 +183,20 @@ function Main({ children }) {
     return <main className="main">{children}</main>
 }
 
-const KEY = 'be7a2e1b&'
-
-function Loader() {
-    return <p className="loader">Loading...</p>
-}
-
-function ErrorMessage({ message }) {
-    return (
-        <p className="error">
-            <span>❌</span>
-            {message}
-        </p>
-    )
-}
-
 export default function App() {
-    const [movies, setMovies] = useState([])
-    const [watched, setWatched] = useState([])
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState('')
-    const [query, setQuery] = useState('')
-    const tempQuery = 'interstellar'
-
-    useEffect(() => {
-        async function fetchMovies() {
-            try {
-                setError('')
-                setIsLoading(true)
-                const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`)
-                if (!res.ok) throw new Error('Something went wrong with fetching')
-                const data = await res.json()
-                if (data.Response === 'False') throw new Error('Movie not found')
-                setMovies(data.Search)
-            } catch (err) {
-                console.error(err.message)
-                setError(err.message)
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
-        if (query.length < 3) {
-            setMovies([])
-            setError('')
-            return
-        }
-        fetchMovies()
-    }, [query])
-
-    // fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`)
-    //     .then(res => res.json())
-    //     .then(data => console.log(data.search))
-
-    // setWatched([])
+    const [movies, setMovies] = useState(tempMovieData)
+    const [watched, setWatched] = useState(tempWatchedData)
 
     return (
         <>
             <Navbar>
                 <Logo />
-                <Search query={query} setQuery={setQuery} />
+                <Search />
                 <NumResults movies={movies} />
             </Navbar>
             <Main>
-                {/* <Box>{isLoading ? <Loader /> : <MovieList movies={movies} />}</Box> */}
                 <Box>
-                    {isLoading && <Loader />}
-                    {!isLoading && !error && <MovieList movies={movies} />}
-                    {error && <ErrorMessage message={error} />}
+                    <MovieList movies={movies} />
                 </Box>
                 <Box>
                     <WatchedSummary watched={watched} />
