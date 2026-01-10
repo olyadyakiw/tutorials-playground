@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/FakeAuthContext'
 import { useEffect } from 'react'
 
-function ProtectedRoute(children) {
+function ProtectedRoute({ children }) {
     const { isAuth } = useAuth()
     const navigate = useNavigate()
 

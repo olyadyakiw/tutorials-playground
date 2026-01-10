@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { createContext, useEffect, useContext, useReducer } from 'react'
 
 const CitiesContext = createContext()
@@ -21,9 +22,6 @@ function reducer(state, action) {
                 isLoading: false,
                 cities: action.payload,
             }
-
-        case 'city/loaded':
-            return { ...state, isLoading: false, currentCity: action.payload }
 
         case 'city/created':
             return {
@@ -73,18 +71,21 @@ function CitiesProvider({ children }) {
         fetchCities()
     }, [])
 
-    async function getCity(id) {
-        if (Number(id) === currentCity.id) return
+    const getCity = useCallback(
+        async function getCity(id) {
+            if (Number(id) === currentCity.id) return
 
-        dispatch({ type: 'loading' })
-        try {
-            const res = await fetch(`${BASE_URL}/cities/${id}`)
-            const data = await res.json()
-            dispatch({ type: 'city/loaded', payload: data })
-        } catch {
-            dispatch({ type: 'rejected', payload: 'There was an error load!' })
-        }
-    }
+            dispatch({ type: 'loading' })
+            try {
+                const res = await fetch(`${BASE_URL}/cities/${id}`)
+                const data = await res.json()
+                dispatch({ type: 'city/loaded', payload: data })
+            } catch {
+                dispatch({ type: 'rejected', payload: 'There was an error load!' })
+            }
+        },
+        [currentCity.id]
+    )
 
     async function createCity(newCity) {
         dispatch({ type: 'loading' })
@@ -128,4 +129,5 @@ function useCities() {
     return context
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { CitiesProvider, useCities }
