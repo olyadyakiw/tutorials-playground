@@ -1,26 +1,27 @@
-import { Outlet, useNavigation } from 'react-router-dom'
-import CartOverview from '../features/cart/CartOverview'
-import Header from './Header'
-import Loader from './Loader'
+import { Outlet, useNavigation } from "react-router-dom";
+import CartOverview from "../features/cart/CartOverview";
+import Header from "./Header";
+import Loader from "./Loader";
 
 function AppLayout() {
-    const navigation = useNavigation()
-    const isLoading = navigation.state === 'loading'
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
 
-    return (
-        <div className="layout">
-            {isLoading && <Loader />}
+  return (
+    <div className="grid-rows-[auto_1fr_auto grid h-screen">
+      {isLoading && <Loader />}
 
-            <Header />
+      <Header />
+      <div className="overflow-scroll">
+        <main className="mx-auto max-w-3xl">
+          <h1>Content</h1>
+          <Outlet />
+        </main>
+      </div>
 
-            <main>
-                <h1>Content</h1>
-                <Outlet />
-            </main>
-
-            <CartOverview />
-        </div>
-    )
+      <CartOverview />
+    </div>
+  );
 }
 
-export default AppLayout
+export default AppLayout;
