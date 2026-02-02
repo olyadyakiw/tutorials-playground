@@ -1,9 +1,14 @@
 function calculateFitness() {
+    let currentRecord = Infinity
     for (let i = 0; i < population.length; i++) {
         let d = calcDistance(cities, population[i])
         if (d < recordDistance) {
             recordDistance = d
             bestEver = population[i]
+        }
+        if (d < currentRecord) {
+            currentRecord = d
+            currentBest = population[i]
         }
         fitness[i] = 1 / (d + 1)
     }
@@ -22,8 +27,10 @@ function normalizeFitness() {
 function nextGeneration() {
     let newPopulation = []
     for (let i = 0; i < population.length; i++) {
-        let order = pickOne(population, fitness)
-        mutate(order)
+        let orderA = pickOne(population, fitness)
+        let orderB = pickOne(population, fitness)
+        let order = crossOver(orderA, orderB)
+        mutate(order, 0.01)
         newPopulation[i] = order
     }
     population = newPopulation
@@ -42,7 +49,26 @@ function pickOne(list, prob) {
 }
 
 function mutate(order, mutationRate) {
-    let indexA = floor(random(order.length))
-    let indexB = floor(random(order.length))
-    swap(order, indexA, indexB)
+    for (let i = 0; i < totalCities; i++) {
+        if (random(1) < mutationRate) {
+            let indexA = floor(random(order.length))
+            let indexB = (indexA + 1) % totalCities
+            swap(order, indexA, indexB)
+        }
+    }
+}
+
+function crossOver(orderA, orderB) {
+    let start = floor(random(orderA.length))
+    let end = floor(random(start, orderA.length))
+    let newOrder = orderA.slice(start, end)
+
+    // let left = totalCities - newOrder.length
+    for (let i = 0; i < orderB.length; i++) {
+        let city = orderB[i]
+        if (!newOrder.includes(city)) {
+            newOrder.push(city)
+        }
+    }
+    return newOrder
 }
