@@ -1,6 +1,5 @@
 import styled, { css } from 'styled-components'
 import { useSearchParams } from 'react-router-dom'
-import { useEffect } from 'react'
 
 const StyledFilter = styled.div`
     border: 1px solid var(--color-grey-100);
@@ -42,6 +41,7 @@ function Filter({ filterField, options }) {
 
     function handleClick(value) {
         searchParams.set(filterField, value)
+        if (searchParams.get('page')) setSearchParams.set('page', 1)
         setSearchParams(searchParams)
     }
     return (
