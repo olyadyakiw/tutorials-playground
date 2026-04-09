@@ -8,9 +8,11 @@
     "build": "vite build"
   },
   "devDependencies": {
+    "prettier": "^3.8.1",
     "vite": "^4.5.0"
   },
   "dependencies": {
+    "lil-gui": "^0.21.0",
     "three": "^0.158.0"
   }
 }
