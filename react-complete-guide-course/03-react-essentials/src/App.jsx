@@ -1,10 +1,16 @@
+import { useState } from 'react'
 import CoreConcept from './components/CoreConcept'
 import Header from './components/Header/Header'
 import TabButton from './components/TabButton'
 import { CORE_CONCEPTS, EXAMPLES, userData } from './data'
 
-function MainGoal() {
-    return <p>My main goal: Learn react from the ground up</p>
+function MainGoal({ title, description }) {
+    return (
+        <div>
+            <h3>{title}</h3>
+            <p>{description}</p>
+        </div>
+    )
 }
 
 function User({ firstName, lastName, title }) {
@@ -16,6 +22,12 @@ function User({ firstName, lastName, title }) {
 }
 
 function App() {
+    const [selectedTopic, setSelectedTopic] = useState()
+
+    function handleClick(selectedButton) {
+        setSelectedTopic(selectedButton)
+    }
+
     return (
         <div>
             <Header />
@@ -23,23 +35,45 @@ function App() {
                 <section id="core-concepts">
                     <h2>Pure concepts</h2>
                     <ul>
-                        <CoreConcept {...CORE_CONCEPTS[0]} />
-                        <CoreConcept {...CORE_CONCEPTS[1]} />
-                        <CoreConcept {...CORE_CONCEPTS[2]} />
-                        <CoreConcept {...CORE_CONCEPTS[3]} />
+                        {CORE_CONCEPTS.map(concept => (
+                            <CoreConcept key={concept.title} {...concept} />
+                        ))}
                     </ul>
                 </section>
                 <section id="examples">
                     <h2>Examples</h2>
                     <menu>
-                        <TabButton>Components</TabButton>
-                        <TabButton>JSX</TabButton>
-                        <TabButton>Props</TabButton>
-                        <TabButton>State</TabButton>
+                        <TabButton
+                            isSelected={selectedTopic === 'components'}
+                            onClick={() => handleClick('components')}
+                        >
+                            Components
+                        </TabButton>
+                        <TabButton isSelected={selectedTopic === 'jsx'} onClick={() => handleClick('jsx')}>
+                            JSX
+                        </TabButton>
+                        <TabButton isSelected={selectedTopic === 'props'} onClick={() => handleClick('props')}>
+                            Props
+                        </TabButton>
+                        <TabButton isSelected={selectedTopic === 'state'} onClick={() => handleClick('state')}>
+                            State
+                        </TabButton>
                     </menu>
+                    {!selectedTopic ? (
+                        <p>Please select a topic</p>
+                    ) : (
+                        <div id="tab-content">
+                            <h3>{EXAMPLES[selectedTopic].title}</h3>
+                            <p>{EXAMPLES[selectedTopic].description}</p>
+                            <pre>
+                                <code>{EXAMPLES[selectedTopic].code}</code>
+                            </pre>
+                        </div>
+                    )}
                 </section>
             </main>
-            {/* <MainGoal /> */}
+            {/* <MainGoal title="Learn React" description="in-depth" /> */}
+            {/* <MainGoal title="Practice" description="practice working with react" /> */}
             {/* <User {...userData} /> */}
         </div>
     )
