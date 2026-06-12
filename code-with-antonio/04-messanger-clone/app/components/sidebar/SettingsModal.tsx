@@ -78,7 +78,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, currentU
                                     <Image
                                         width="48"
                                         height="48"
-                                        className="rounded-full"
+                                        className="rounded-full h-12"
                                         src={image || currentUser?.image || '/images/placeholder.jpg'}
                                         alt="Avatar"
                                     />
