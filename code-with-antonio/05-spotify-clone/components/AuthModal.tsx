@@ -32,7 +32,7 @@ const AuthModal = () => {
             <Auth
                 magicLink
                 theme="dark"
-                providers={['github']}
+                providers={['github', 'google']}
                 appearance={{
                     theme: ThemeSupa,
                     variables: {
