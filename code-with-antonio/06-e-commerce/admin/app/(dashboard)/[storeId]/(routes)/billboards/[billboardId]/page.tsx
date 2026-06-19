@@ -1,5 +1,7 @@
+import { format } from 'date-fns'
 import prismadb from '@/lib/prismadb'
-import BillboardForm from '../components/billboard-form'
+import BillboardForm from './components/billboard-form'
+import { BillboardColumn } from '../components/columns'
 
 const BillboardPage = async ({ params }: { params: { billboardId: string } }) => {
     const billboard = await prismadb.billboard.findUnique({
