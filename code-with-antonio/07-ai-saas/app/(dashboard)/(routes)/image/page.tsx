@@ -20,9 +20,17 @@ import { cn } from '@/lib/utils'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardFooter } from '@/components/ui/card'
 import Image from 'next/image'
+import { useProModal } from '@/hooks/use-pro-modal'
+import toast from 'react-hot-toast'
+
+type GeneratedImage = {
+    url?: string
+    b64_json?: string
+}
 
 const ImagePage = () => {
     const router = useRouter()
+    const proModal = useProModal()
     const [images, setImages] = useState<string[]>([])
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -30,7 +38,7 @@ const ImagePage = () => {
         defaultValues: {
             prompt: '',
             amount: '1',
-            resolution: '512x512',
+            resolution: '1024x1024',
         },
     })
 
@@ -42,13 +50,28 @@ const ImagePage = () => {
 
             const response = await axios.post('/api/image', values)
 
-            const urls = response.data.map((image: { url: string }) => image.url)
+            const urls = response.data
+                .map((image: GeneratedImage) => {
+                    if (image.url) {
+                        return image.url
+                    }
+
+                    if (image.b64_json) {
+                        return `data:image/png;base64,${image.b64_json}`
+                    }
+
+                    return null
+                })
+                .filter((src: string | null): src is string => Boolean(src))
 
             setImages(urls)
             form.reset()
         } catch (error: any) {
-            console.log(error)
-            // TODO Open Pro Modal
+            if (error?.response?.status === 403) {
+                proModal.onOpen()
+            } else {
+                toast.error('Something went wrong')
+            }
         } finally {
             router.refresh()
         }
@@ -143,10 +166,10 @@ const ImagePage = () => {
                     )}
                     {images.length === 0 && !isLoading && <Empty label="No images generated" />}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-8">
-                        {images.map(src => (
-                            <Card key={src} className="rounded-lg overflow-hidden">
+                        {images.map((src, index) => (
+                            <Card key={`${src}-${index}`} className="rounded-lg overflow-hidden">
                                 <div className="relative aspect-square">
-                                    <Image alt="Image" fill src={src} />
+                                    <Image alt="Image" fill src={src} unoptimized={src.startsWith('data:')} />
                                 </div>
                                 <CardFooter className="p-2">
                                     <Button onClick={() => window.open(src)} variant="secondary" className="w-full">
