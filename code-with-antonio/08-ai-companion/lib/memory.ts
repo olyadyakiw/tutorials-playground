@@ -21,29 +21,34 @@ export class MemoryManager {
 
     public async init() {
         if (this.vectorDBClient instanceof PineconeClient) {
-            await this.vectorDBClient.init({
-                apiKey: process.env.PINECONE_API_KEY!,
-                environment: process.env.PINECONE_ENVIRONMENT!,
-            })
+            try {
+                await this.vectorDBClient.init({
+                    apiKey: process.env.PINECONE_API_KEY!,
+                    environment: process.env.PINECONE_ENVIRONMENT!,
+                })
+            } catch (err) {
+                console.warn('Failed to initialize Pinecone. Vector search will be skipped.', err)
+            }
         }
     }
 
     public async vectorSearch(recentChatHistory: string, companionFileName: string) {
-        const pineconeClient = <PineconeClient>this.vectorDBClient
+        try {
+            const pineconeClient = <PineconeClient>this.vectorDBClient
 
-        const pineconeIndex = pineconeClient.Index(process.env.PINECONE_INDEX! || '')
+            const pineconeIndex = pineconeClient.Index(process.env.PINECONE_INDEX! || '')
 
-        const vectorStore = await PineconeStore.fromExistingIndex(
-            new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY }),
-            { pineconeIndex },
-        )
+            const vectorStore = await PineconeStore.fromExistingIndex(
+                new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY }),
+                { pineconeIndex },
+            )
 
-        const similarDocs = await vectorStore
-            .similaritySearch(recentChatHistory, 3, { fileName: companionFileName })
-            .catch(err => {
-                console.log('Failed to get vector search results', err)
-            })
-        return similarDocs
+            const similarDocs = await vectorStore.similaritySearch(recentChatHistory, 3, { fileName: companionFileName })
+            return similarDocs
+        } catch (err) {
+            console.warn('Failed to get vector search results. Continuing without Pinecone context.', err)
+            return []
+        }
     }
 
     public static async getInstance(): Promise<MemoryManager> {

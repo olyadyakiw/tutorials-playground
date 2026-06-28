@@ -8,6 +8,7 @@ import { useCompletion } from 'ai/react'
 import ChatForm from '../../../../../../components/chat-form'
 import ChatMessages from '../../../../../../components/chat-messages'
 import { ChatMessageProps } from '@/components/chat-message'
+import { useToast } from '@/hooks/use-toast'
 
 interface ChatClientProps {
     companion: Companion & {
@@ -20,6 +21,7 @@ interface ChatClientProps {
 
 const ChatClient = ({ companion }: ChatClientProps) => {
     const router = useRouter()
+    const { toast } = useToast()
     const [messages, setMessages] = useState<ChatMessageProps[]>(companion.messages)
 
     const { input, isLoading, handleInputChange, handleSubmit, setInput } = useCompletion({
@@ -32,6 +34,17 @@ const ChatClient = ({ companion }: ChatClientProps) => {
 
             setMessages(current => [...current, systemMessage])
             setInput('')
+
+            router.refresh()
+        },
+        onError(error) {
+            toast({
+                variant: 'destructive',
+                title: 'Something went wrong.',
+                description: error.message.includes('429') || error.message.includes('rate limit')
+                    ? 'Groq rate limit exceeded. Try again later.'
+                    : 'Failed to generate a response.',
+            })
 
             router.refresh()
         },

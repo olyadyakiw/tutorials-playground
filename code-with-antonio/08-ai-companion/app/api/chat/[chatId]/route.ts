@@ -1,12 +1,23 @@
-import { StreamingTextResponse, LangChainStream } from 'ai'
-import { auth, currentUser } from '@clerk/nextjs'
-import { CallbackManager } from 'langchain/callbacks'
-import { Replicate } from 'langchain/llms/replicate'
+import { StreamingTextResponse } from 'ai'
+import { currentUser } from '@clerk/nextjs'
 import { NextResponse } from 'next/server'
 
 import { MemoryManager } from '@/lib/memory'
 import { rateLimit } from '@/lib/rate-limit'
 import prismadb from '@/libs/prismadb'
+
+const GROQ_MODEL = 'llama-3.1-8b-instant'
+
+type GroqChatCompletion = {
+    choices?: {
+        message?: {
+            content?: string
+        }
+    }[]
+    error?: {
+        message?: string
+    }
+}
 
 export async function POST(request: Request, { params }: { params: { chatId: string } }) {
     try {
@@ -72,23 +83,21 @@ export async function POST(request: Request, { params }: { params: { chatId: str
             relevantHistory = similarDocs.map(doc => doc.pageContent).join('\n')
         }
 
-        const { handlers } = LangChainStream()
+        let resp = ''
 
-        const model = new Replicate({
-            model: 'a16z-infra/llama-2-13b-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5',
-            input: {
-                max_length: 2048,
-            },
-            apiKey: process.env.REPLICATE_API_TOKEN,
-            callbackManager: CallbackManager.fromHandlers(handlers),
-        })
-
-        model.verbose = true
-
-        const resp = String(
-            await model
-                .call(
-                    `
+        try {
+            const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: GROQ_MODEL,
+                    messages: [
+                        {
+                            role: 'user',
+                            content: `
         ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${companion.name}: prefix. 
 
         ${companion.instructions}
@@ -98,9 +107,29 @@ export async function POST(request: Request, { params }: { params: { chatId: str
 
 
         ${recentChatHistory}\n${companion.name}:`,
-                )
-                .catch(console.error),
-        )
+                        },
+                    ],
+                    max_tokens: 500,
+                    temperature: 0.7,
+                }),
+            })
+
+            const groqData = (await groqResponse.json()) as GroqChatCompletion
+
+            if (!groqResponse.ok) {
+                throw new Error(groqData.error?.message || 'Groq request failed')
+            }
+
+            resp = groqData.choices?.[0]?.message?.content || ''
+        } catch (error) {
+            console.log('{CHAT_POST_GROQ}', error)
+
+            if (error instanceof Error && error.message.includes('rate_limit')) {
+                return new NextResponse('Groq rate limit exceeded', { status: 429 })
+            }
+
+            return new NextResponse('Failed to generate response', { status: 500 })
+        }
 
         const cleaned = resp.replaceAll(',', '')
         const chuncks = cleaned.split('\n')
