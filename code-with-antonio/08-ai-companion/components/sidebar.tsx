@@ -1,12 +1,18 @@
 'use client'
 
+import { userProModal } from '@/hooks/user-pro-modal'
 import { cn } from '@/lib/utils'
 import { Home, Plus, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
-const Sidebar = () => {
+interface SidebarProps {
+    isPro: boolean
+}
+
+const Sidebar = ({ isPro }: SidebarProps) => {
     const pathname = usePathname()
+    const proModal = userProModal()
     const router = useRouter()
     const routes = [
         {
@@ -30,7 +36,9 @@ const Sidebar = () => {
     ]
 
     const onNavigate = (url: string, pro: boolean) => {
-        // todo: check if pro
+        if (pro && !isPro) {
+            return proModal.onOpen()
+        }
         return router.push(url)
     }
 

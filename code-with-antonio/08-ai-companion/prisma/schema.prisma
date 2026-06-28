@@ -56,3 +56,13 @@ model Message {
 
   @@index([companionId])
 }
+
+model UserSubscription {
+  id String @id @default(uuid())
+  userId String @unique
+  stripeCustomerId String? @unique @map(name: "stripe_customer_id")
+  stripeSubscriptionrId String? @unique @map(name: "stripe_subcription_id")
+  stripePriceId String? @unique @map(name: "stripe_price_id")
+  stripeCurrentPeriodEnd DateTime? @unique @map(name: "stripe_current_period_end")
+
+}
