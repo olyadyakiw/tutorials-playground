@@ -7,7 +7,7 @@ import { ServerWithMembersWithProfiles } from '@/types'
 import { ScrollArea } from '../ui/scroll-area'
 import UserAvatar from '../user-avatar'
 import { Check, Gavel, Loader2, MoreVertical, Shield, ShieldAlert, ShieldCheck, ShieldQuestion } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -77,6 +77,12 @@ const MembersModal = () => {
             setLoadingId('')
         }
     }
+
+    useEffect(() => {
+        return () => {
+            document.body.style.pointerEvents = ''
+        }
+    }, [isOpen])
 
     return (
         <Dialog open={isModalOpen} onOpenChange={onClose}>

@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { useModal } from '@/hooks/useModalStore'
 import { Button } from '../ui/button'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 
@@ -38,6 +38,12 @@ const DeleteServerModal = () => {
             setIsLoading(false)
         }
     }
+
+    useEffect(() => {
+        return () => {
+            document.body.style.pointerEvents = ''
+        }
+    }, [isOpen])
 
     return (
         <Dialog open={isModalOpen} onOpenChange={onClose}>

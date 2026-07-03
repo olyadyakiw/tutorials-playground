@@ -28,6 +28,7 @@ import { Button } from '@/components/ui/button'
 import FileUpload from '../file-upload'
 import { useRouter } from 'next/navigation'
 import { useModal } from '@/hooks/useModalStore'
+import { useEffect } from 'react'
 
 const CreateServerModal = () => {
     const { isOpen, onClose, type } = useModal()
@@ -61,6 +62,12 @@ const CreateServerModal = () => {
         form.reset()
         onClose()
     }
+
+    useEffect(() => {
+        return () => {
+            document.body.style.pointerEvents = ''
+        }
+    }, [isOpen])
 
     return (
         <Dialog open={isModalOpen} onOpenChange={handleClose}>

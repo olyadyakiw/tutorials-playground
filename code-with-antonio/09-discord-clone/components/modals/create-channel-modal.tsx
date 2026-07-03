@@ -13,6 +13,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useModal } from '@/hooks/useModalStore'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ChanelType } from '@prisma/client'
+import { useEffect } from 'react'
 
 const formSchema = z.object({
     name: z
@@ -65,6 +66,12 @@ const CreateChannelModal = () => {
         form.reset()
         onClose()
     }
+
+    useEffect(() => {
+        return () => {
+            document.body.style.pointerEvents = ''
+        }
+    }, [isOpen])
 
     return (
         <Dialog open={isModalOpen} onOpenChange={handleClose}>
