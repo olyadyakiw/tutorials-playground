@@ -1,6 +1,7 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { useState } from 'react'
+import { FileIcon, X } from 'lucide-react'
 import Image from 'next/image'
 
 import { UploadDropzone } from '@/lib/uploadthing'
@@ -12,16 +13,44 @@ interface FileUploadProps {
 }
 
 const FileUpload = ({ onChange, value, endpoint }: FileUploadProps) => {
-    const fileType = value?.split('.').pop()
+    const [uploadedFileType, setUploadedFileType] = useState<string>()
 
-    if (value && fileType !== 'pdf') {
+    const isPdf = uploadedFileType === 'application/pdf' || value?.toLowerCase().endsWith('.pdf')
+
+    const handleRemove = () => {
+        setUploadedFileType(undefined)
+        onChange('')
+    }
+
+    if (value && !isPdf) {
         return (
             <div className="relative w-20 h-20">
                 <Image fill alt="Upload" src={value} className="rounded-full" />
                 <button
                     type="button"
-                    onClick={() => onChange('')}
+                    onClick={handleRemove}
                     className="bg-rose-500 text-white p-1 rounded-full absolute top-0 right-0 shadow-sm"
+                >
+                    <X className="h-4 w-4" />
+                </button>
+            </div>
+        )
+    } else if (value && isPdf) {
+        return (
+            <div className="relative flex items-center p-2 mt-2 rounded-md bg-background/10">
+                <FileIcon className="h-10 w-10 fill-indigo-200 stroke-indigo-400" />
+                <a
+                    href={value}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-2 text-sm text-indigo-500 dark:text-indigo-400 hover:underline text-ellipsis max-w-sm overflow-x-hidden"
+                >
+                    {value}
+                </a>
+                <button
+                    type="button"
+                    onClick={handleRemove}
+                    className="bg-rose-500 text-white p-1 rounded-full absolute -top-2 -right-2 shadow-sm"
                 >
                     <X className="h-4 w-4" />
                 </button>
@@ -33,7 +62,8 @@ const FileUpload = ({ onChange, value, endpoint }: FileUploadProps) => {
         <UploadDropzone
             endpoint={endpoint}
             onClientUploadComplete={res => {
-                onChange(res?.[0]?.serverData?.url)
+                setUploadedFileType(res?.[0]?.type)
+                onChange(res?.[0]?.url)
             }}
             onUploadError={(error: Error) => {
                 console.log(error)
