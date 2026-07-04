@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useModal } from '@/hooks/useModalStore'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ChanelType } from '@prisma/client'
@@ -27,19 +27,18 @@ const formSchema = z.object({
     type: z.nativeEnum(ChanelType),
 })
 
-const CreateChannelModal = () => {
+const EditChannelModal = () => {
     const { isOpen, onClose, type, data } = useModal()
     const router = useRouter()
-    const params = useParams()
 
-    const isModalOpen = isOpen && type === 'createChannel'
-    const { channelType } = data
+    const isModalOpen = isOpen && type === 'editChannel'
+    const { channel, server } = data
 
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: '',
-            type: channelType || ChanelType.TEXT,
+            type: channel?.type || ChanelType.TEXT,
         },
     })
 
@@ -48,12 +47,12 @@ const CreateChannelModal = () => {
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
             const url = qs.stringifyUrl({
-                url: '/api/channels',
+                url: `/api/channels/${channel?.id}`,
                 query: {
-                    serverId: params?.serverId,
+                    serverId: server?.id,
                 },
             })
-            await axios.post(url, values)
+            await axios.patch(url, values)
 
             form.reset()
             router.refresh()
@@ -75,18 +74,17 @@ const CreateChannelModal = () => {
     }, [isOpen])
 
     useEffect(() => {
-        if (channelType) {
-            form.setValue('type', channelType)
-        } else {
-            form.setValue('type', ChanelType.TEXT)
+        if (channel) {
+            form.setValue('name', channel.name)
+            form.setValue('type', channel.type)
         }
-    }, [channelType, form])
+    }, [form, channel])
 
     return (
         <Dialog open={isModalOpen} onOpenChange={handleClose}>
             <DialogContent className="bg-white text-black p-0 overflow-hidden">
                 <DialogHeader className="pt-8 px-6">
-                    <DialogTitle className="text-2xl text-center font-bold">Create channel</DialogTitle>
+                    <DialogTitle className="text-2xl text-center font-bold">Edit channel</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
@@ -141,7 +139,7 @@ const CreateChannelModal = () => {
                         </div>
                         <DialogFooter className="bg-gray-100 px-6 py-4">
                             <Button variant="primary" disabled={isLoading}>
-                                Create
+                                Save
                             </Button>
                         </DialogFooter>
                     </form>
@@ -151,4 +149,4 @@ const CreateChannelModal = () => {
     )
 }
 
-export default CreateChannelModal
+export default EditChannelModal
