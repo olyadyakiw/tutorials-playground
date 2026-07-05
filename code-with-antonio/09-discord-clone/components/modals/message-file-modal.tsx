@@ -9,6 +9,7 @@ const formSchema = z.object({
     fileUrl: z.string().min(1, {
         message: 'Attachment is required',
     }),
+    fileType: z.string().optional(),
 })
 
 import {
@@ -34,10 +35,11 @@ const MessageFileModal = () => {
 
     const isModalOpen = isOpen && type === 'messageFile'
 
-    const form = useForm({
+    const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             fileUrl: '',
+            fileType: '',
         },
     })
 
@@ -90,6 +92,9 @@ const MessageFileModal = () => {
                                                     endpoint="messageFile"
                                                     value={field.value}
                                                     onChange={field.onChange}
+                                                    onFileTypeChange={fileType =>
+                                                        form.setValue('fileType', fileType || '')
+                                                    }
                                                 />
                                             </FormControl>
                                         </FormItem>

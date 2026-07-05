@@ -8,17 +8,19 @@ import { UploadDropzone } from '@/lib/uploadthing'
 
 interface FileUploadProps {
     onChange: (url?: string) => void
+    onFileTypeChange?: (fileType?: string) => void
     value: string
     endpoint: 'messageFile' | 'serverImage'
 }
 
-const FileUpload = ({ onChange, value, endpoint }: FileUploadProps) => {
+const FileUpload = ({ onChange, onFileTypeChange, value, endpoint }: FileUploadProps) => {
     const [uploadedFileType, setUploadedFileType] = useState<string>()
 
     const isPdf = uploadedFileType === 'application/pdf' || value?.toLowerCase().endsWith('.pdf')
 
     const handleRemove = () => {
         setUploadedFileType(undefined)
+        onFileTypeChange?.(undefined)
         onChange('')
     }
 
@@ -62,8 +64,11 @@ const FileUpload = ({ onChange, value, endpoint }: FileUploadProps) => {
         <UploadDropzone
             endpoint={endpoint}
             onClientUploadComplete={res => {
-                setUploadedFileType(res?.[0]?.type)
-                onChange(res?.[0]?.url)
+                const file = res?.[0]
+
+                setUploadedFileType(file?.type)
+                onFileTypeChange?.(file?.type)
+                onChange(file?.url)
             }}
             onUploadError={(error: Error) => {
                 console.log(error)

@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponseS
 
     try {
         const profile = await currentProfilePages(req)
-        const { content, fileUrl } = req.body
+        const { content, fileUrl, fileType } = req.body
         const { serverId, channelId } = req.query
 
         if (!profile) {
@@ -27,6 +27,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponseS
 
         if (!content) {
             return res.status(400).json({ error: 'Content missing' })
+        }
+
+        const safeFileType =
+            typeof fileType === 'string' && (fileType === 'application/pdf' || fileType.startsWith('image/'))
+                ? fileType
+                : null
+
+        if (fileType && !safeFileType) {
+            return res.status(400).json({ error: 'Unsupported file type' })
         }
 
         const server = await db.server.findFirst({
@@ -68,6 +77,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponseS
             data: {
                 content,
                 fileUrl,
+                fileType: fileUrl ? safeFileType : null,
                 channelId: channelId as string,
                 memberId: member.id,
             },
