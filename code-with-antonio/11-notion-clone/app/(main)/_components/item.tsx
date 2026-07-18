@@ -26,7 +26,7 @@ interface ItemProps {
     level?: number
     onExpand?: () => void
     label: string
-    onClick: () => void
+    onClick?: () => void
     icon: LucideIcon
 }
 
@@ -97,7 +97,7 @@ const Item = ({
                 <div
                     role="button"
                     onClick={handleExpand}
-                    className="h-full rounded-sm hover:bg-neutral-300 dark:bg-neutral-600 mr-1"
+                    className="h-full rounded-sm hover:bg-neutral-300 dark:hover:bg-neutral-600 mr-1"
                 >
                     <ChevronIcon className="h-4 w-4 shrink-0 text-muted-foreground/50" />
                 </div>
