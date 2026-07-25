@@ -17,4 +17,10 @@ class Particle {
         ellipse(0, 0, this.r * 2)
         pop()
     }
+
+    isOffscreen() {
+        let x = this.body.position.x
+        let y = this.body.position.y
+        return x < -50 || x > width + 50
+    }
 }
