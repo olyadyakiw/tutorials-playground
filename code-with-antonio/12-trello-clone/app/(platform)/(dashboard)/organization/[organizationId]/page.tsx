@@ -1,3 +1,5 @@
+import { FormInput } from '@/components/form/form-input'
+import FormSubmit from '@/components/form/form-submit'
 import { Button } from '@/components/ui/button'
 import { db } from '@/lib/db'
 
@@ -6,14 +8,8 @@ const OrganizationIdPage = async () => {
     return (
         <div className="flex flex-col space-y-4">
             <form>
-                <input
-                    id="title"
-                    name="title"
-                    required
-                    placeholder="Enter a board title"
-                    className="border-black border p-1"
-                />
-                <Button type="submit">Submit</Button>
+                <FormInput id="title" label="Title" />
+                <FormSubmit>Submit</FormSubmit>
             </form>
             <div className="space-y-2">
                 {boards.map(board => (
