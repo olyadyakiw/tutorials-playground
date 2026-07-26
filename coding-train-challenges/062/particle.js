@@ -1,16 +1,20 @@
 class Particle {
     constructor(x, y, r) {
+        this.hue = random(360)
         let options = {
-            restitution: 0.8,
+            restitution: 0.5,
             friction: 0,
+            density: 1,
         }
+        x += random(1, -1)
         this.r = r
         this.body = Bodies.circle(x, y, r, options)
+        this.body.label = 'particle'
         World.add(world, this.body)
     }
     show() {
-        fill(255)
-        stroke(255)
+        fill(this.hue, 255, 255)
+        noStroke()
         let pos = this.body.position
         push()
         translate(pos.x, pos.y)

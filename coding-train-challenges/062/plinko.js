@@ -7,11 +7,12 @@ class Plinko {
         }
         this.r = r
         this.body = Bodies.circle(x, y, r, options)
+        this.body.label = 'plinko'
         World.add(world, this.body)
     }
     show() {
-        fill(0, 255, 0)
-        stroke(0, 255, 0)
+        fill(127)
+        noStroke()
         let pos = this.body.position
         push()
         translate(pos.x, pos.y)

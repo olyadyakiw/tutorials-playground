@@ -1,5 +1,6 @@
 let Engine = Matter.Engine,
     World = Matter.World,
+    Events = Matter.Events,
     Bodies = Matter.Bodies
 
 let engine
@@ -10,11 +11,35 @@ let bounds = []
 let cols = 11
 let rows = 10
 
+function preload() {
+    ding = loadSound('ding.mp3')
+}
+
 function setup() {
     createCanvas(600, 800)
+    colorMode(HSB)
     engine = Engine.create()
     world = engine.world
     world.gravity.y = 1
+
+    function collision(event) {
+        let pairs = event.pairs
+        for (let i = 0; i < pairs.length; i++) {
+            let bodyA = pairs[i].bodyA.label
+            let bodyB = pairs[i].bodyB.label
+
+            if (bodyA == 'plinko' && bodyB == 'particle') {
+                // ding.play()
+            }
+
+            if (bodyA == 'particle' && bodyB == 'plinko') {
+                // ding.play()
+            }
+        }
+    }
+
+    Events.on(engine, 'collisionStart', collision)
+
     newParticle()
 
     let spacing = width / cols
@@ -26,7 +51,7 @@ function setup() {
                 x += spacing / 2
             }
             let y = spacing + j * spacing
-            let p = new Plinko(x, y, 4)
+            let p = new Plinko(x, y, 16)
             plinkos.push(p)
         }
     }
@@ -54,8 +79,8 @@ function draw() {
     if (frameCount % 60 == 0) {
         newParticle()
     }
-    background(51)
-    Engine.update(engine)
+    background(0, 0, 0)
+    Engine.update(engine, 16.666)
 
     for (let i = 0; i < particles.length; i++) {
         particles[i].show()
