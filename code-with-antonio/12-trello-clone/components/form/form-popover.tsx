@@ -28,7 +28,7 @@ const FormPopover = ({ children, side = 'bottom', align, sideOffset = 0 }: FormP
         onSuccess: data => {
             toast.success('Board created')
             closeRef.current?.click()
-            router.push(`/board/${data.imageId}`)
+            router.push(`/board/${data.id}`)
         },
         onError: error => {
             toast.error(error)
