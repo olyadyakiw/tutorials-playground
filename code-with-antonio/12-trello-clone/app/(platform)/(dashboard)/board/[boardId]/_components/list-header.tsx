@@ -8,6 +8,7 @@ import { FormInput } from '@/components/form/form-input'
 import { useAction } from '@/hooks/use-action'
 import { updateList } from '@/actions/update-list'
 import { toast } from 'sonner'
+import ListOptions from './list-options'
 
 interface ListHeaderProps {
     data: List
@@ -72,7 +73,7 @@ const ListHeader = ({ data }: ListHeaderProps) => {
     useEventListener('keydown', onKeydown)
 
     return (
-        <div className="pt-2 px-2 text-sm font-semibold flex justify-between items-start gap-x-2">
+        <div className="pt-2 px-2 text-sm font-semibold flex justify-between items-center gap-x-2">
             {isEditing ? (
                 <form ref={formRef} action={handleSubmit} className="flex-1 px-[2px]">
                     <input hidden id="id" name="id" value={data.id} />
@@ -88,10 +89,11 @@ const ListHeader = ({ data }: ListHeaderProps) => {
                     <button type="submit" hidden></button>
                 </form>
             ) : (
-                <div onClick={enabledEditing} className="w-full text-sm px-2.5 h-7 font-medium border-transparent">
+                <div onClick={enabledEditing} className="w-full text-sm px-2.5 h-auto font-medium border-transparent">
                     {title}
                 </div>
             )}
+            <ListOptions data={data} onAddCard={() => {}} />
         </div>
     )
 }
