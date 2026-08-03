@@ -22,7 +22,7 @@ const Recommended = ({ data }: RecommendedProps) => {
             )}
             <ul className="space-y-2 px-2">
                 {data.map(user => (
-                    <UserItem isLive={true} key={user.id} username={user.username} imageUrl={user.imageUrl} />
+                    <UserItem key={user.id} username={user.username} imageUrl={user.imageUrl} />
                 ))}
             </ul>
         </div>
