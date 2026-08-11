@@ -5,6 +5,7 @@ import { useConnectionState, useRemoteParticipant, useTracks } from '@livekit/co
 import { OfflineVideo } from './offline-video'
 import { LoadingVideo } from './loading-video'
 import LiveVideo from './live-video'
+import { Skeleton } from '../ui/skeleton'
 
 interface VideoProps {
     hostName: string
@@ -29,6 +30,14 @@ const Video = ({ hostIdentity, hostName }: VideoProps) => {
     }
 
     return <div className="aspect-video border-b group relative">{content}</div>
+}
+
+export const VideoSkeleton = () => {
+    return (
+        <div className="aspect-video border-x border-background">
+            <Skeleton className="h-full w-full rounded-none" />
+        </div>
+    )
 }
 
 export default Video
