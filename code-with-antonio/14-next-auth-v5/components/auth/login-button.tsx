@@ -1,6 +1,9 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { Dialog, DialogContent } from '../ui/dialog'
+import { DialogTrigger } from '@radix-ui/react-dialog'
+import { LoginForm } from './login-form'
 
 interface LoginButtonProps {
     children: React.ReactNode
@@ -16,7 +19,14 @@ const LoginButton = ({ children, mode = 'redirect', asChild }: LoginButtonProps)
     }
 
     if (mode === 'modal') {
-        return <span>{/* TODO */}</span>
+        return (
+            <Dialog>
+                <DialogTrigger asChild={asChild}>{children}</DialogTrigger>
+                <DialogContent className="p-0 w-auto bg-transparent border-none">
+                    <LoginForm />
+                </DialogContent>
+            </Dialog>
+        )
     }
 
     return (
