@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { mutation } from './_generated/server'
+import { mutation, query } from './_generated/server'
 
 const images = [
     '/placeholders/1.svg',
@@ -51,6 +51,16 @@ export const remove = mutation({
             throw new Error('Unauthorized')
         }
 
+        const userId = identity.subject
+        const existingFavorite = await ctx.db
+            .query('userFavorities')
+            .withIndex('by_user_board', q => q.eq('userId', userId).eq('boardId', args.id))
+            .unique()
+
+        if (existingFavorite) {
+            await ctx.db.delete(existingFavorite._id)
+        }
+
         await ctx.db.delete(args.id)
     },
 })
@@ -80,6 +90,83 @@ export const update = mutation({
         const board = await ctx.db.patch(args.id, {
             title: args.title,
         })
+
+        return board
+    },
+})
+
+export const favorite = mutation({
+    args: { id: v.id('boards'), orgId: v.string() },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity()
+
+        if (!identity) {
+            throw new Error('Unauthorized')
+        }
+
+        const board = await ctx.db.get(args.id)
+
+        if (!board) {
+            throw new Error('Board not found')
+        }
+
+        const userId = identity.subject
+
+        const existingFavorite = await ctx.db
+            .query('userFavorities')
+            .withIndex('by_user_board', q => q.eq('userId', userId).eq('boardId', board._id))
+            .unique()
+
+        if (existingFavorite) {
+            throw new Error('Board already favoritied')
+        }
+
+        await ctx.db.insert('userFavorities', {
+            userId,
+            boardId: board._id,
+            orgId: args.orgId,
+        })
+
+        return board
+    },
+})
+
+export const unfavorite = mutation({
+    args: { id: v.id('boards') },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity()
+
+        if (!identity) {
+            throw new Error('Unauthorized')
+        }
+
+        const board = await ctx.db.get(args.id)
+
+        if (!board) {
+            throw new Error('Board not found')
+        }
+
+        const userId = identity.subject
+
+        const existingFavorite = await ctx.db
+            .query('userFavorities')
+            .withIndex('by_user_board', q => q.eq('userId', userId).eq('boardId', board._id))
+            .unique()
+
+        if (!existingFavorite) {
+            throw new Error('Favorite board not found')
+        }
+
+        await ctx.db.delete(existingFavorite._id)
+
+        return board
+    },
+})
+
+export const get = query({
+    args: { id: v.id('boards') },
+    handler: async (ctx, args) => {
+        const board = ctx.db.get(args.id)
 
         return board
     },
