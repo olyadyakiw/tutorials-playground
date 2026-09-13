@@ -55,7 +55,7 @@ export const getUnits = cache(async () => {
             const allCompletedChallenges = lesson.challenges.every(challenge => {
                 return (
                     challenge.challengeProgress.length > 0 &&
-                    challenge.challengeProgress.every(progress => progress.correct)
+                    challenge.challengeProgress.every(progress => progress.completed)
                 )
             })
 
@@ -117,7 +117,7 @@ export const getCourseProgress = cache(async () => {
                 return (
                     !challenge.challengeProgress ||
                     challenge.challengeProgress.length === 0 ||
-                    challenge.challengeProgress.some(progress => progress.correct === false)
+                    challenge.challengeProgress.some(progress => progress.completed === false)
                 )
             })
         })
@@ -165,7 +165,7 @@ export const getLesson = cache(async (id?: number) => {
         const completed =
             challenge.challengeProgress &&
             challenge.challengeProgress.length > 0 &&
-            challenge.challengeProgress.every(progress => progress.correct)
+            challenge.challengeProgress.every(progress => progress.completed)
 
         return { ...challenge, completed }
     })

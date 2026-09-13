@@ -1,11 +1,14 @@
 'use client'
 
 import { challengeOptions, challenges } from '@/db/schema'
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import Header from './header'
 import QuestionBubble from './question-bubble'
 import Challenge from './challenge'
 import Footer from './footer'
+import { upsertChallengeProgress } from '@/actions/challenge-progress'
+import { toast } from 'sonner'
+import { reduceHearts } from '@/actions/user-progress'
 
 type Props = {
     initialPercentage: number
@@ -25,6 +28,8 @@ const Quiz = ({
     initialPercentage,
     userSubscription,
 }: Props) => {
+    const [pending, startYtansition] = useTransition()
+
     const [hearts, setHearts] = useState(initialHearts)
     const [percentage, setPercentage] = useState(initialPercentage)
     const [challenges] = useState(initialLessonChallenges)
@@ -39,10 +44,70 @@ const Quiz = ({
     const challenge = challenges[activeIndex]
     const options = challenge?.challengeOptions ?? []
 
+    const onNext = () => {
+        setActiveIndex(current => current + 1)
+    }
+
     const onSelect = (id: number) => {
         if (status !== 'none') return
 
         setSelectedOption(id)
+    }
+
+    const onContinue = () => {
+        if (!selectedOption) return
+
+        if (status === 'wrong') {
+            setStatus('none')
+            setSelectedOption(undefined)
+            return
+        }
+
+        if (status === 'correct') {
+            onNext()
+            setStatus('none')
+            setSelectedOption(undefined)
+            return
+        }
+
+        const correctOption = options.find(option => option.correct)
+
+        if (correctOption && correctOption.id === selectedOption) {
+            startYtansition(() => {
+                upsertChallengeProgress(challenge.id)
+                    .then(res => {
+                        if (res?.error === 'hearts') {
+                            console.error('Missing hearts')
+                            return
+                        }
+
+                        setStatus('correct')
+                        setPercentage(prev => prev + 100 / challenges.length)
+
+                        if (initialPercentage === 0) {
+                            setHearts(prev => Math.min(prev + 1, 5))
+                        }
+                    })
+                    .catch(() => toast.error('Something went wrong'))
+            })
+        } else {
+            startYtansition(() => {
+                reduceHearts(challenge.id)
+                    .then(res => {
+                        if (res?.error === 'hearts') {
+                            console.error('Missing hearts')
+                            return
+                        }
+
+                        setStatus('wrong')
+
+                        if (!res?.error) {
+                            setHearts(prev => Math.max(prev - 1, 0))
+                        }
+                    })
+                    .catch(() => toast.error('Something went wrong'))
+            })
+        }
     }
 
     const title = challenge.type === 'ASSIST' ? 'Select the correct meaning' : challenge.question
@@ -63,14 +128,14 @@ const Quiz = ({
                                 onSelect={onSelect}
                                 status={status}
                                 selectedOption={selectedOption}
-                                disabled={false}
+                                disabled={pending}
                                 type={challenge.type}
                             />
                         </div>
                     </div>
                 </div>
             </div>
-            <Footer disabled={!selectedOption} status={status} onCheck={() => {}} />
+            <Footer disabled={pending || !selectedOption} status={status} onCheck={onContinue} />
         </>
     )
 }

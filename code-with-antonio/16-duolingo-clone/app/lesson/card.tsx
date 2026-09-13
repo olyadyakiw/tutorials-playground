@@ -54,7 +54,7 @@ const Card = ({ id, imageSrc, audioSrc, text, shortcut, selected, onClick, disab
                         'text-neutral-600 text-sm lg:text-base',
                         selected && 'text-blue-500',
                         selected && status === 'correct' && 'text-green-500',
-                        selected && status === 'correct' && 'text-rose-500',
+                        selected && status === 'wrong' && 'text-rose-500',
                     )}
                 >
                     {text}
@@ -64,7 +64,7 @@ const Card = ({ id, imageSrc, audioSrc, text, shortcut, selected, onClick, disab
                         'lg:w-[30px] lg:h-[30px] w-[20px] h-[20px] border-2 flex items-center justify-center rounded-lg text-neutral-400 lg:text-[15px] text-xs font-semibold',
                         selected && 'border-sky-300 text-sky-500',
                         selected && status === 'correct' && 'text-green-500 border-green-500',
-                        selected && status === 'correct' && 'text-rose-500 border-rose-500',
+                        selected && status === 'wrong' && 'text-rose-500 border-rose-500',
                     )}
                 >
                     {shortcut}
