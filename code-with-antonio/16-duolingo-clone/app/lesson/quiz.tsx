@@ -9,6 +9,17 @@ import Footer from './footer'
 import { upsertChallengeProgress } from '@/actions/challenge-progress'
 import { toast } from 'sonner'
 import { reduceHearts } from '@/actions/user-progress'
+import { useAudio, useMount, useWindowSize } from 'react-use'
+import Image from 'next/image'
+import ResultCard from './result-card'
+import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
+import { useHeartsModal } from '@/store/use-hearts-modal'
+import { usePracticeModal } from '@/store/use-practice-modal'
+
+const Confetti = dynamic(() => import('react-confetti'), {
+    ssr: false,
+})
 
 type Props = {
     initialPercentage: number
@@ -28,10 +39,28 @@ const Quiz = ({
     initialPercentage,
     userSubscription,
 }: Props) => {
+    const { open: openHeartsModal } = useHeartsModal()
+    const { open: openPracticeModal } = usePracticeModal()
+
+    useMount(() => {
+        if (initialPercentage === 100) {
+            openPracticeModal()
+        }
+    })
+
+    const { width, height } = useWindowSize()
+    const router = useRouter()
+    const [finishAudio] = useAudio({ src: '/finish.mp3', autoPlay: true })
+
+    const [correctAudio, _c, correctControls] = useAudio({ src: '/correct.wav' })
+    const [incorrectAudio, _i, incorrectControls] = useAudio({ src: '/incorrect.wav' })
     const [pending, startYtansition] = useTransition()
 
+    const [lessonId] = useState(initialLessonId)
     const [hearts, setHearts] = useState(initialHearts)
-    const [percentage, setPercentage] = useState(initialPercentage)
+    const [percentage, setPercentage] = useState(() => {
+        return initialPercentage === 100 ? 0 : initialPercentage
+    })
     const [challenges] = useState(initialLessonChallenges)
     const [activeIndex, setActiveIndex] = useState(() => {
         const uncompletedIndex = challenges.findIndex(challenge => !challenge.completed)
@@ -77,10 +106,11 @@ const Quiz = ({
                 upsertChallengeProgress(challenge.id)
                     .then(res => {
                         if (res?.error === 'hearts') {
-                            console.error('Missing hearts')
+                            openHeartsModal()
                             return
                         }
 
+                        correctControls.play()
                         setStatus('correct')
                         setPercentage(prev => prev + 100 / challenges.length)
 
@@ -95,10 +125,11 @@ const Quiz = ({
                 reduceHearts(challenge.id)
                     .then(res => {
                         if (res?.error === 'hearts') {
-                            console.error('Missing hearts')
+                            openHeartsModal()
                             return
                         }
 
+                        incorrectControls.play()
                         setStatus('wrong')
 
                         if (!res?.error) {
@@ -110,10 +141,33 @@ const Quiz = ({
         }
     }
 
+    if (!challenge) {
+        return (
+            <>
+                {finishAudio}
+                <Confetti recycle={false} numberOfPieces={500} tweenDuration={10000} width={width} height={height} />
+                <div className="flex flex-col gap-y-4 lg:gap-y-8 max-w-lg mx-auto text-center items-center justify-center h-full">
+                    <Image src="/finish.svg" alt="Finish" className="hidden lg:block" width={100} height={100} />
+                    <Image src="/finish.svg" alt="Finish" className="lg:hidden block" width={50} height={50} />
+                    <h1 className="text-xl lg:text-3xl font-bold text-neutral-700">
+                        Great job! <br /> You&apos;ve complete the lesson
+                    </h1>
+                    <div className="flex items-center gap-x-4 w-full">
+                        <ResultCard variant="points" value={challenges.length * 10} />
+                        <ResultCard variant="hearts" value={hearts} />
+                    </div>
+                </div>
+                <Footer lessonId={lessonId} status="completed" onCheck={() => router.push('/learn')} />
+            </>
+        )
+    }
+
     const title = challenge.type === 'ASSIST' ? 'Select the correct meaning' : challenge.question
 
     return (
         <>
+            {incorrectAudio}
+            {correctAudio}
             <Header hearts={hearts} percentage={percentage} hasActiveSubscription={!!userSubscription?.isActive} />
             <div className="flex-1">
                 <div className="h-full flex items-center justify-center">
