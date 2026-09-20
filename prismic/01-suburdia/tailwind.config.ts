@@ -1,18 +1,23 @@
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss'
+import fluid, { extract } from 'fluid-tailwind'
 
 export default {
-  content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-      },
+    content: {
+        files: [
+            './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+            './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+            './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+            './src/slices/**/*.{js,ts,jsx,tsx,mdx}',
+        ],
+        extract,
     },
-  },
-  plugins: [],
-} satisfies Config;
+    theme: {
+        extend: {
+            fontFamily: {
+                sans: ['var(--font-bowly-sc)'],
+                mono: ['var(--font-dm-mono)'],
+            },
+        },
+    },
+    plugins: [fluid],
+} satisfies Config
