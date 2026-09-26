@@ -194,7 +194,7 @@ export type BoardCustomizerDocument<Lang extends string = string> =
   >;
 
 type HomepageDocumentDataSlicesSlice =
-  TextAndImageSlice | ProductGridSlice | HeroSlice;
+  VideoBlockSlice | TextAndImageSlice | ProductGridSlice | HeroSlice;
 
 /**
  * Content for Homepage documents
@@ -859,6 +859,51 @@ export type TextAndImageSlice = prismic.SharedSlice<
   TextAndImageSliceVariation
 >;
 
+/**
+ * Primary content in *VideoBlock → Default → Primary*
+ */
+export interface VideoBlockSliceDefaultPrimary {
+  /**
+   * Youtube Video Id field in *VideoBlock → Default → Primary*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: *None*
+   * - **API ID Path**: video_block.default.primary.youtube_video_id
+   * - **Documentation**: https://prismic.io/docs/fields/text
+   */
+  youtube_video_id: prismic.KeyTextField;
+}
+
+/**
+ * Default variation for VideoBlock Slice
+ *
+ * - **API ID**: `default`
+ * - **Description**: Default
+ * - **Documentation**: https://prismic.io/docs/slices
+ */
+export type VideoBlockSliceDefault = prismic.SharedSliceVariation<
+  "default",
+  Simplify<VideoBlockSliceDefaultPrimary>,
+  never
+>;
+
+/**
+ * Slice variation for *VideoBlock*
+ */
+type VideoBlockSliceVariation = VideoBlockSliceDefault;
+
+/**
+ * VideoBlock Shared Slice
+ *
+ * - **API ID**: `video_block`
+ * - **Description**: VideoBlock
+ * - **Documentation**: https://prismic.io/docs/slices
+ */
+export type VideoBlockSlice = prismic.SharedSlice<
+  "video_block",
+  VideoBlockSliceVariation
+>;
+
 declare module "@prismicio/client" {
   interface CreateClient {
     (
@@ -912,6 +957,10 @@ declare module "@prismicio/client" {
       TextAndImageSliceVariation,
       TextAndImageSliceDefault,
       TextAndImageSliceImageOnLeft,
+      VideoBlockSlice,
+      VideoBlockSliceDefaultPrimary,
+      VideoBlockSliceVariation,
+      VideoBlockSliceDefault,
     };
   }
 }
