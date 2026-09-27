@@ -194,7 +194,11 @@ export type BoardCustomizerDocument<Lang extends string = string> =
   >;
 
 type HomepageDocumentDataSlicesSlice =
-  VideoBlockSlice | TextAndImageSlice | ProductGridSlice | HeroSlice;
+  | TeamGridSlice
+  | VideoBlockSlice
+  | TextAndImageSlice
+  | ProductGridSlice
+  | HeroSlice;
 
 /**
  * Content for Homepage documents
@@ -686,6 +690,51 @@ export type ProductGridSlice = prismic.SharedSlice<
 >;
 
 /**
+ * Primary content in *TeamGrid → Default → Primary*
+ */
+export interface TeamGridSliceDefaultPrimary {
+  /**
+   * Heading field in *TeamGrid → Default → Primary*
+   *
+   * - **Field Type**: Rich Text
+   * - **Placeholder**: *None*
+   * - **API ID Path**: team_grid.default.primary.heading
+   * - **Documentation**: https://prismic.io/docs/fields/rich-text
+   */
+  heading: prismic.RichTextField;
+}
+
+/**
+ * Default variation for TeamGrid Slice
+ *
+ * - **API ID**: `default`
+ * - **Description**: Default
+ * - **Documentation**: https://prismic.io/docs/slices
+ */
+export type TeamGridSliceDefault = prismic.SharedSliceVariation<
+  "default",
+  Simplify<TeamGridSliceDefaultPrimary>,
+  never
+>;
+
+/**
+ * Slice variation for *TeamGrid*
+ */
+type TeamGridSliceVariation = TeamGridSliceDefault;
+
+/**
+ * TeamGrid Shared Slice
+ *
+ * - **API ID**: `team_grid`
+ * - **Description**: TeamGrid
+ * - **Documentation**: https://prismic.io/docs/slices
+ */
+export type TeamGridSlice = prismic.SharedSlice<
+  "team_grid",
+  TeamGridSliceVariation
+>;
+
+/**
  * Primary content in *TextAndImage → Default → Primary*
  */
 export interface TextAndImageSliceDefaultPrimary {
@@ -951,6 +1000,10 @@ declare module "@prismicio/client" {
       ProductGridSliceDefaultPrimary,
       ProductGridSliceVariation,
       ProductGridSliceDefault,
+      TeamGridSlice,
+      TeamGridSliceDefaultPrimary,
+      TeamGridSliceVariation,
+      TeamGridSliceDefault,
       TextAndImageSlice,
       TextAndImageSliceDefaultPrimary,
       TextAndImageSliceImageOnLeftPrimary,
